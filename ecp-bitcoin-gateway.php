@@ -342,7 +342,7 @@ function ECP__plugins_loaded__load_bitcoin_gateway() {
 					'options'     => self::$exchange_rate_type_options,
 				),
 				'exchange_multiplier'                  => array(
-					'title'       => __( 'Multiply the exchnage rate by this value before using it.', 'woocommerce' ),
+					'title'       => __( 'Multiply the exchange rate by this value before using it.', 'woocommerce' ),
 					'description' => __( 'Use this to hedge for volatility (1.05 or whatever ou feel is safe.) or to give your users a discount by paying with Bitcoin (0.95 or whatever you feel is good).', 'woocommerce' ),
 					'default'     => '1.00',
 				), // store as string so we don't have issues with floats until it is time to use it
