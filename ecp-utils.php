@@ -376,7 +376,7 @@ abstract class ElectrumUtil {
 
 				// $address_request_array = array();
 				// $address_request_array['btc_address'] = $address_to_verify_for_zero_balance;
-				// $address_request_array['required_confirmations'] = 0;
+				$address_request_array['required_confirmations'] = 1;
 				// $address_request_array['api_timeout'] = $this->ecp_settings['blockchain_api_timeout_secs'];
 				// possible clean address
 				$maybe_clean_address = $this->fetch_addresses_from_row( $address_to_verify_for_zero_balance_row );
