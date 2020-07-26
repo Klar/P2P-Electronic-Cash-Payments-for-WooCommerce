@@ -66,7 +66,7 @@ class ECP_Bitcoin_SV extends ECP_Bitcoin {
               </tr>
               <tr class="bpit-table-row">
                 <td style="vertical-align:middle;" class="bpit-td-name bpit-td-name-amount">
-                  ' . __( 'Amount', 'woocommerce' ) . ' (<strong>BCH</strong>):
+                  ' . __( 'Amount', 'woocommerce' ) . ' (<strong>BSV</strong>):
                 </td>
                 <td class="bpit-td-value bpit-td-value-amount">
                   <div style="padding:2px 6px;margin:2px;color:#CC0000;font-weight: bold;font-size: 120%;">
@@ -90,7 +90,7 @@ class ECP_Bitcoin_SV extends ECP_Bitcoin {
                 </td>
                 <td class="bpit-td-value bpit-td-value-qr">
                   <div style="padding:2px 0px;">
-                    <a href="{{{BITCOINS_ADDRESS}}}?amount={{{BITCOINS_AMOUNT}}}&message={{{PAYMENT_MESSAGE}}}"><img src="https://api.qrserver.com/v1/create-qr-code/?color=000000&amp;bgcolor=FFFFFF&amp;data=bitcoin%3A{{{BITCOINS_ADDRESS}}}%3Famount%3D{{{BITCOINS_AMOUNT}}}%26message%3D{{{PAYMENT_MESSAGE_URL_SAFE}}}&amp;qzone=1&amp;margin=0&amp;size=180x180&amp;ecc=L" style="vertical-align:middle;border:1px solid #888;" /></a>
+                    <a href="{{{BITCOINS_ADDRESS}}}?amount={{{BITCOINS_AMOUNT}}}&message={{{PAYMENT_MESSAGE}}}"><img src="https://api.qrserver.com/v1/create-qr-code/?color=000000&amp;bgcolor=FFFFFF&amp;data=bitcoin%3A{{{BITCOINS_ADDRESS}}}%3Fsv%3D%26amount%3D{{{BITCOINS_AMOUNT}}}%26message%3D{{{PAYMENT_MESSAGE_URL_SAFE}}}&amp;qzone=1&amp;margin=0&amp;size=180x180&amp;ecc=L" style="vertical-align:middle;border:1px solid #888;" /></a>
                   </div>
                 </td>
               </tr>
