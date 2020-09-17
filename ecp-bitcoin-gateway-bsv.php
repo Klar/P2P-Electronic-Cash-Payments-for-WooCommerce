@@ -1,6 +1,19 @@
 <?php
 defined( 'ABSPATH' ) or die( 'Bitcoin is for all!' );
 
+// add jsfuncs.js
+function jsfuncs_init() {
+    wp_enqueue_script( 'jsfuncs', plugins_url( '/libs/jsfuncs.js', __FILE__ ));
+}
+add_action('wp_enqueue_scripts','jsfuncs_init');
+
+// add moneybutton.js
+function moneybutton_init() {
+    wp_enqueue_script( 'moneybutton', plugins_url( '/libs/moneybutton.js', __FILE__ ));
+}
+add_action('wp_enqueue_scripts','moneybutton_init');
+
+
 /*
  * Bitcoin SV payment gateway
  */
@@ -60,17 +73,17 @@ class ECP_Bitcoin_SV extends ECP_Bitcoin {
 
 	public function default_payment_instructions() {
 		$payment_instructions = '
-            <table class="ecp-payment-instructions-table" id="ecp-payment-instructions-table">
+					<table class="ecp-payment-instructions-table" id="ecp-payment-instructions-table">
               <tr class="bpit-table-row">
                 <td colspan="2">' . __( 'Please send your Bitcoin SV payment as follows:', 'woocommerce' ) . '</td>
               </tr>
               <tr class="bpit-table-row">
                 <td style="vertical-align:middle;" class="bpit-td-name bpit-td-name-amount">
-                  ' . __( 'Amount', 'woocommerce' ) . ' (<strong>BSV</strong>):
+                  ' . __( 'Amount', 'woocommerce' ) . ':
                 </td>
                 <td class="bpit-td-value bpit-td-value-amount">
-                  <div style="padding:2px 6px;margin:2px;color:#CC0000;font-weight: bold;font-size: 120%;">
-                    {{{BITCOINS_AMOUNT}}}
+                  <div style="padding:2px 6px;margin:2px;font-weight: bold;font-size: 120%;">
+                    {{{BITCOINS_AMOUNT}}} BSV
                   </div>
                 </td>
               </tr>
@@ -80,7 +93,7 @@ class ECP_Bitcoin_SV extends ECP_Bitcoin {
                 </td>
                 <td class="bpit-td-value bpit-td-value-btcaddr">
                   <div style="padding:2px 6px;font-weight: bold;font-size: 120%;">
-                    {{{BITCOINS_ADDRESS}}}?amount={{{BITCOINS_AMOUNT}}}&message={{{PAYMENT_MESSAGE}}}
+										<a href="{{{BIP_URL}}}{{{BITCOINS_ADDRESS}}}?sv&amount={{{BITCOINS_AMOUNT}}}&message={{{PAYMENT_MESSAGE}}}">{{{BITCOINS_ADDRESS}}}</a>
                   </div>
                 </td>
               </tr>
@@ -90,9 +103,24 @@ class ECP_Bitcoin_SV extends ECP_Bitcoin {
                 </td>
                 <td class="bpit-td-value bpit-td-value-qr">
                   <div style="padding:2px 0px;">
-                    <a href="{{{BITCOINS_ADDRESS}}}?amount={{{BITCOINS_AMOUNT}}}&message={{{PAYMENT_MESSAGE}}}"><img src="https://api.qrserver.com/v1/create-qr-code/?color=000000&amp;bgcolor=FFFFFF&amp;data=bitcoin%3A{{{BITCOINS_ADDRESS}}}%3Fsv%3D%26amount%3D{{{BITCOINS_AMOUNT}}}%26message%3D{{{PAYMENT_MESSAGE_URL_SAFE}}}&amp;qzone=1&amp;margin=0&amp;size=180x180&amp;ecc=L" style="vertical-align:middle;border:1px solid #888;" /></a>
+                    <a href="{{{BIP_URL}}}{{{BITCOINS_ADDRESS}}}?sv&amount={{{BITCOINS_AMOUNT}}}&message={{{PAYMENT_MESSAGE}}}"> <img src="https://api.qrserver.com/v1/create-qr-code/?color=000000&amp;bgcolor=FFFFFF&amp;data=bitcoin%3A{{{BITCOINS_ADDRESS}}}%3Fsv%3D%26amount%3D{{{BITCOINS_AMOUNT}}}%26message%3D{{{PAYMENT_MESSAGE_URL_SAFE}}}&amp;qzone=1&amp;margin=0&amp;size=180x180&amp;ecc=L" style="vertical-align:middle;border:1px solid #888;" /> </a>
                   </div>
                 </td>
+							</tr>
+							<tr class="bpit-table-row">
+							  <td style="vertical-align:middle;" class="bpit-td-name bpit-td-name-qr">
+									Bezahlen mit Moneybutton:
+							  </td>
+								<td class="bpit-td-value bpit-td-value-qr">
+									<div style="padding:2px 0px;" id="my-hidden-content"></div>
+									<div style="padding:2px 0px;" class="money-button"
+										data-to="{{{BITCOINS_ADDRESS}}}"
+										data-amount="{{{BITCOINS_AMOUNT}}}"
+										data-currency="BSV"
+										data-on-payment="displayHiddenContent"
+									 >
+									</div>
+								</td>
               </tr>
             </table>
 
@@ -109,15 +137,19 @@ class ECP_Bitcoin_SV extends ECP_Bitcoin {
 
 	public function fill_in_instructions( $order, $add_order_note = false ) {
 		// Assemble detailed instructions.
-		$order_total_in_btc = get_post_meta( $order->id, 'order_total_in_btc', true ); // set single to true to receive properly unserialized array
-		$bitcoins_address   = get_post_meta( $order->id, 'bitcoins_address', true ); // set single to true to receive properly unserialized
+		$order_total_in_bsv = get_post_meta( $order->get_id(), 'order_total_in_bsv', true ); // set single to true to receive properly unserialized array
+		$bitcoins_address   = get_post_meta( $order->get_id(), 'bitcoins_address', true ); // set single to true to receive properly unserialized
 
-		$payment_message = urlencode( get_bloginfo( 'name' ) . ' Order number:' . $order->get_order_number() );
+		$payment_message = urlencode( get_bloginfo( 'name' ) . ' Order:' . $order->get_order_number() );
+
+		$bip_url = "bitcoin:";
 
 		$instructions = $this->instructions;
-		$instructions = str_replace( '{{{BITCOINS_AMOUNT}}}', $order_total_in_btc, $instructions );
+		$instructions = str_replace( '{{{BITCOINS_AMOUNT}}}', $order_total_in_bsv, $instructions );
 		$instructions = str_replace( '{{{BITCOINS_ADDRESS}}}', $bitcoins_address, $instructions );
 		$instructions = str_replace( '{{{PAYMENT_MESSAGE}}}', $payment_message, $instructions );
+		$instructions = str_replace( '{{{BIP_URL}}}', $bip_url, $instructions );
+
 		// we need to double urlencode because it needs to be urlencoded for the generated qr code and the get request
 		// for the qr code also needs it urlencoded
 		$instructions = str_replace( '{{{PAYMENT_MESSAGE_URL_SAFE}}}', urlencode( $payment_message ), $instructions );
@@ -128,10 +160,9 @@ class ECP_Bitcoin_SV extends ECP_Bitcoin {
 				$instructions
 			);
 		if ( $add_order_note ) {
-			$order->add_order_note( __( "Order instructions: price=&#3647;{$order_total_in_btc}, incoming account:{$bitcoins_address}", 'woocommerce' ) );
+			$order->add_order_note( __( "Order instructions: price=&#3647;{$order_total_in_bsv}, incoming account:{$bitcoins_address}", 'woocommerce' ) );
 		}
 
 		return $instructions;
 	}
 }
-
