@@ -37,12 +37,3 @@ require_once dirname( __FILE__ ) . '/ecp-render-settings.php';
 require_once dirname( __FILE__ ) . '/ecp-bitcoin-exchange-rate-apis.php';
 require_once dirname( __FILE__ ) . '/ecp-bitcoin-gateway.php';
 require_once dirname( __FILE__ ) . '/ecp-bitcoin-blockchain-apis.php';
-
-
-
-// Load cashaddr libs
-require_once dirname( __FILE__ ) . '/libs/cashaddr/Base32.php';
-require_once dirname( __FILE__ ) . '/libs/cashaddr/CashAddress.php';
-require_once dirname( __FILE__ ) . '/libs/cashaddr/Exception/Base32Exception.php';
-require_once dirname( __FILE__ ) . '/libs/cashaddr/Exception/CashAddressException.php';
-require_once dirname( __FILE__ ) . '/libs/cashaddr/Exception/InvalidChecksumException.php';
