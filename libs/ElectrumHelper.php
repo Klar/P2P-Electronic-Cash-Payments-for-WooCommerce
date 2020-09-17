@@ -33,7 +33,6 @@ class ElectrumHelper
         }
         $pubkeys = array();
         $pubkeys["btc_address"] = self::pubkey_to_bc_address($pubkey);
-        $pubkeys["bch_cashaddr"] = self::pubkey_to_bch_cashaddr($pubkey);
         return $pubkeys;
     }
 
@@ -376,16 +375,6 @@ class ElectrumHelper
         $addr = $vh160 . substr($h, 0, 4);
 
         return self::base58_encode($addr);
-    }
-
-    // creates a bitcoincash cashaddr address
-    // see https://github.com/Bitcoin-UAHF/spec/blob/master/cashaddr.md
-    // for specifiction
-    public static function pubkey_to_bch_cashaddr($pubkey)
-    {
-        $prefix = "bitcoincash";
-        $pubkeyBin = pack("H*", $pubkey);
-        return CashAddress::pubKeyHashFromKey($prefix, $pubkeyBin);
     }
 
     public static function secp256k1_params()
