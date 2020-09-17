@@ -216,7 +216,7 @@ function ECP__update_cache( $exchange_rate, $exchange_rate_type ) {
 							"unknown"     - new address was generated but cannot retrieve balance due to blockchain API failure.
 */
 function ECP__create_database_tables( $ecp_settings ) {
-	$create_tables = array( 'TableBCH', 'TableBSV' );
+	$create_tables = array( 'TableBSV' );
 
 	foreach ( $create_tables as $table ) {
 		$table::create_database_tables();
@@ -226,11 +226,10 @@ function ECP__create_database_tables( $ecp_settings ) {
 // ===========================================================================
 // NOTE: Irreversibly deletes all plugin tables and data
 function ECP__delete_database_tables() {
-	$create_tables = array( 'TableBCH', 'TableBSV' );
+	$create_tables = array( 'TableBSV' );
 
 	foreach ( $create_tables as $table ) {
 		$table::delete_database_tables();
 	}
 }
 // ===========================================================================
-
