@@ -1,7 +1,7 @@
 === P2P Electronic Cash Payments for WooCommerce ===
 Contributors: cryptartica, sanchaz
 Donation address: https://cryptartica.com ( Buy yourself some Bitcoin Cash/SV Merchandise :) )
-Tags: bitcoin cash, bitcoin cash wordpress plugin, bitcoin cash plugin, bitcoin cash payments, accept bitcoin cash, bch, bitcoin sv, bitcoin sv wordpress plugin, bitcoin sv plugin, bitcoin sv payments, accept bitcoin sv, bsv
+Tags: bitcoin sv, bitcoin sv wordpress plugin, bitcoin sv plugin, bitcoin sv payments, accept bitcoin sv, bsv
 Requires at least: Wordpress 4.9.9
 Tested up to: Wordpress 5.1.1
 Requires PHP: 5.6.40
@@ -106,5 +106,3 @@ Can I contribute? Sure! Go ahead and make a pull request. Clearly explain what t
 == Upgrade Notice ==
 
 None
-
-
