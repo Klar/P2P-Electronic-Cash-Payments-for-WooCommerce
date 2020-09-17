@@ -46,13 +46,13 @@ If you encounter any problems, please open an issue.
 ## Screenshots
 
 1. Settings
-![Settings](assets/screenshots-1.png?raw=true)
+![Settings](assets/screenshot-1.png?raw=true)
 2. Advanced Settings
-![Advanced Settings](assets/screenshots-2.png?raw=true)
+![Advanced Settings](assets/screenshot-2.png?raw=true)
 3. Woocommerce Payment methods
-![Woocommerce Payment methods](assets/screenshots-3.png?raw=true)
+![Woocommerce Payment methods](assets/screenshot-3.png?raw=true)
 5. Woocommerce Payments methods Bitcoin SV Settings
-![Woocommerce Payments methods Bitcoin SV Settings](assets/screenshots-4.png?raw=true)
+![Woocommerce Payments methods Bitcoin SV Settings](assets/screenshot-4.png?raw=true)
 
 ## Remove plugin
 
