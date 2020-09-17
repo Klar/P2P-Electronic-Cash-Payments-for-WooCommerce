@@ -63,36 +63,9 @@ abstract class ExchangeRateAPI {
 	}
 }
 
-class Bitpay extends ExchangeRateAPI {
-
-	private static $supported_bitcoin_variant = array( 'bch' );
-	private static $exchange_rate_types       = array( 'realtime' );
-
-	protected function get_supported_variants() {
-		return self::$supported_bitcoin_variant;
-	}
-
-	protected function get_supported_exchange_rate_types() {
-		return self::$exchange_rate_types;
-	}
-
-	public function get_exchange_rate_realtime() {
-		$source_url = 'https://bitpay.com/api/rates/BCH/' . get_woocommerce_currency();
-		$result     = @ECP__file_get_contents( $source_url, $this->exchange_rate_api_timeout_secs );
-
-		$rate_obj = @json_decode( trim( $result ), true );
-
-		if ( @$rate_obj['code'] == get_woocommerce_currency() && $rate_obj['rate'] ) {
-			return $rate_obj['rate'];   // Only realtime rate is available
-		}
-
-		return false;
-	}
-}
-
 class Coinmarketcap extends ExchangeRateAPI {
 
-	private static $supported_bitcoin_variant = array( 'bch', 'bsv' );
+	private static $supported_bitcoin_variant = array( 'bsv' );
 	private static $exchange_rate_types       = array( 'realtime' );
 
 	private $is_active = false;
@@ -136,7 +109,7 @@ class Coinmarketcap extends ExchangeRateAPI {
 
 class Coinlib extends ExchangeRateAPI {
 
-	private static $supported_bitcoin_variant = array( 'bch', 'bsv' );
+	private static $supported_bitcoin_variant = array( 'bsv' );
 	private static $exchange_rate_types       = array( 'realtime' );
 
 	private $is_active = false;
@@ -161,9 +134,6 @@ class Coinlib extends ExchangeRateAPI {
 
 	private function get_symbol() {
 		switch ( $this->variant_in_use ) {
-			case 'bch':
-				return 'BCH';
-				break;
 			case 'bsv':
 				return 'BSV';
 				break;
@@ -191,46 +161,9 @@ class Coinlib extends ExchangeRateAPI {
 	}
 }
 
-class BitcoinAverage extends ExchangeRateAPI {
-
-	private static $supported_bitcoin_variant = array( 'bch' );
-	private static $exchange_rate_types       = array( 'vwap', 'realtime' );
-
-	protected function get_supported_variants() {
-		return self::$supported_bitcoin_variant;
-	}
-
-	protected function get_supported_exchange_rate_types() {
-		return self::$exchange_rate_types;
-	}
-
-	private function get_exchange_rate( $rate_type ) {
-		$source_url = 'https://apiv2.bitcoinaverage.com/indices/global/ticker/short?crypto=' . strtoupper( $this->variant_in_use ) . '&fiat=' . get_woocommerce_currency();
-		$result     = @ECP__file_get_contents( $source_url, $this->exchange_rate_api_timeout_secs );
-
-		$rate_obj = @json_decode( trim( $result ), true );
-
-		if ( ! is_array( $rate_obj ) ) {
-			return false;
-		}
-
-		$json_root = strtoupper( $this->variant_in_use ) . strtoupper( get_woocommerce_currency() );
-
-		return @$rate_obj[ $json_root ];
-	}
-
-	public function get_exchange_rate_vwap() {
-		return $this->get_exchange_rate( 'vwap' )['averages']['day'];
-	}
-
-	public function get_exchange_rate_realtime() {
-		return $this->get_exchange_rate( 'realtime' )['last'];
-	}
-}
-
 class Coingecko extends ExchangeRateAPI {
 
-	private static $supported_bitcoin_variant = array( 'bch', 'bsv' );
+	private static $supported_bitcoin_variant = array( 'bsv' );
 	private static $exchange_rate_types       = array( 'realtime' );
 
 	protected function get_supported_variants() {
@@ -243,9 +176,6 @@ class Coingecko extends ExchangeRateAPI {
 
 	private function get_variant_url_part() {
 		switch ( $this->variant_in_use ) {
-			case 'bch':
-				return 'bitcoin-cash';
-				break;
 			case 'bsv':
 				return 'bitcoin-cash-sv';
 				break;
@@ -269,5 +199,3 @@ class Coingecko extends ExchangeRateAPI {
 		return false;
 	}
 }
-
-
