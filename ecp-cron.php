@@ -258,23 +258,6 @@ abstract class BitcoinCronJob {
 	}
 }
 
-class BitcoinBCHCronJob extends BitcoinCronJob {
-
-	private $gateway;
-
-		parent::__construct();
-		$this->gateway = new ECP_Bitcoin_Cash();
-	}
-
-	protected function get_gateway() {
-		return $this->gateway;
-	}
-
-	protected function get_table_name() {
-		return TableBCH::get_table_name();
-	}
-}
-
 class BitcoinBSVCronJob extends BitcoinCronJob {
 
 	private $gateway;
