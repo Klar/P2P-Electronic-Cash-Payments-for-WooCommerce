@@ -137,7 +137,7 @@ abstract class BitcoinCronJob {
 						ECP__log_event( __FILE__, __LINE__, "Cron job: NOTE: Detected non-zero balance at address: '{$row_for_balance_check['btc_address']}, order ID = '{$last_order_info['order_id']}'. Detected balance ='{$balance_info_array['balance']}'." );
 
 						if ( $balance_info_array['balance'] < $last_order_info['order_total'] ) {
-							ECP__log_event( __FILE__, __LINE__, "Cron job: NOTE: balance at address: '{$row_for_balance_check['btc_address']}' (BTC '{$balance_info_array['balance']}') is not yet sufficient to complete it's order (order ID = '{$last_order_info['order_id']}'). Total required: '{$last_order_info['order_total']}'. Will wait for more funds to arrive..." );
+							ECP__log_event( __FILE__, __LINE__, "Cron job: NOTE: balance at address: '{$row_for_balance_check['btc_address']}' (BSV '{$balance_info_array['balance']}') is not yet sufficient to complete it's order (order ID = '{$last_order_info['order_id']}'). Total required: '{$last_order_info['order_total']}'. Will wait for more funds to arrive..." );
 						}
 					} else {
 					}
@@ -154,7 +154,7 @@ abstract class BitcoinCronJob {
 									// All orders placed on this address in reverse chronological order
 									array (
 									   'order_id'     => $order_id,
-									   'order_total'  => $order_total_in_btc,
+									   'order_total'  => $order_total_in_bsv,
 									   'order_datetime'  => date('Y-m-d H:i:s T'),
 									   'requested_by_ip' => @$_SERVER['REMOTE_ADDR'],
 									),
