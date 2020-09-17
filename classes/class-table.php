@@ -90,58 +90,6 @@ abstract class Table {
 		$wpdb->query( "DROP TABLE IF EXISTS `$btc_addresses_table_name`" );
 	}
 }
-/**
- * Class implementing BCH Tables
- */
-class TableBCH extends Table {
-
-	/**
-	 * Variant this table represents
-	 *
-	 * @return string the bitcoin variant in this case bch
-	 */
-	public static function get_bitcoin_variant() {
-		return 'bch';
-	}
-
-	/**
-	 * Schema version, this is useful for future changes
-	 *
-	 * @return int version of the schema
-	 */
-	public static function get_schema_version() {
-		return 1.0;
-	}
-
-	/**
-	 * Query string that allows the creation of the table needed
-	 * bch includes bch_cashaddr
-	 *
-	 * @param  string $btc_addresses_table_name name of the tabel to be created.
-	 * @return strign                           sting containing the SQL
-	 */
-	public static function get_query( $btc_addresses_table_name ) {
-		return "CREATE TABLE IF NOT EXISTS `$btc_addresses_table_name` (
-            `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-            `btc_address` char(36) NOT NULL,
-            `bch_cashaddr` char(80),
-            `origin_id` char(128) NOT NULL DEFAULT '',
-            `index_in_wallet` bigint(20) NOT NULL DEFAULT '0',
-            `status` char(16)  NOT NULL DEFAULT 'unknown',
-            `last_assigned_to_ip` char(16) NOT NULL DEFAULT '0.0.0.0',
-            `assigned_at` bigint(20) NOT NULL DEFAULT '0',
-            `total_received_funds` DECIMAL( 16, 8 ) NOT NULL DEFAULT '0.00000000',
-            `received_funds_checked_at` bigint(20) NOT NULL DEFAULT '0',
-            `address_meta` MEDIUMBLOB NULL,
-            PRIMARY KEY (`id`),
-            UNIQUE KEY `btc_address` (`btc_address`),
-            UNIQUE KEY `bch_cashaddr` (`bch_cashaddr`),
-            KEY `index_in_wallet` (`index_in_wallet`),
-            KEY `origin_id` (`origin_id`),
-            KEY `status` (`status`)
-            );";
-	}
-}
 
 /**
  * Class implementing BSV Tables
