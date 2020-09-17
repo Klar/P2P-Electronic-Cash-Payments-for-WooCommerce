@@ -262,7 +262,6 @@ class BitcoinBCHCronJob extends BitcoinCronJob {
 
 	private $gateway;
 
-	public function __construct() {
 		parent::__construct();
 		$this->gateway = new ECP_Bitcoin_Cash();
 	}
@@ -297,9 +296,7 @@ class BitcoinBSVCronJob extends BitcoinCronJob {
 function ECP_cron_job_worker( ) {
 	global $wpdb;
 
-	
-
-	$cron_classes = array( 'BitcoinBCHCronJob', 'BitcoinBSVCronJob' );
+	$cron_classes = array( 'BitcoinBSVCronJob' );
 
 	foreach ( $cron_classes as $job_class ) {
 		$job = new $job_class();
