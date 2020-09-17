@@ -2,6 +2,15 @@
 defined( 'ABSPATH' ) or die( 'Bitcoin is for all!' );
 
 
+/* Echo variable
+ * Description: Uses <pre> and print_r to display a variable in formated fashion
+ */
+function echo_log( $what )
+{
+    echo '<pre>'.print_r( $what, true ).'</pre>';
+}
+
+
 // ---------------------------------------------------------------------------
 add_action( 'plugins_loaded', 'ECP__plugins_loaded__load_bitcoin_gateway', 0 );
 // ---------------------------------------------------------------------------
@@ -234,7 +243,7 @@ function ECP__plugins_loaded__load_bitcoin_gateway() {
 
 							<label for="<?php echo esc_attr( $icon_key ); ?>"><img src="<?php echo esc_attr( $icon_data['url'] ); ?>" height="32"></img></label><br />
 						<?php endforeach; ?>
-						
+
 					<?php echo $this->get_description_html( $data ); ?>
 					<?php
 					echo "<p class='description'>You can upload new icons for this gateway to: " . str_replace( ABSPATH, '', dirname( __FILE__ ) . $this->get_icon_dir() ) . '<br/>
@@ -440,7 +449,7 @@ function ECP__plugins_loaded__load_bitcoin_gateway() {
 			// this defines the providers priorities
 			// first provider in the array is checked first
 			// if it fails, we move on to the next one
-			$providers_class = array( 'Bitpay', 'BitcoinAverage', 'Coingecko', 'Coinmarketcap', 'Coinlib' );
+			$providers_class = array( 'Coingecko', 'Coinmarketcap', 'Coinlib' );
 
 			$providers = array();
 			foreach ( $providers_class as $provider ) {
@@ -572,12 +581,12 @@ function ECP__plugins_loaded__load_bitcoin_gateway() {
 
 			// TODO: Implement CRM features within store admin dashboard
 			$order_meta                = array();
-			$order_meta['bw_order']    = $order;
+			// $order_meta['bw_order']    = $order;
 			$order_meta['bw_items']    = $order->get_items();
 			$order_meta['bw_b_addr']   = $order->get_formatted_billing_address();
 			$order_meta['bw_s_addr']   = $order->get_formatted_shipping_address();
-			$order_meta['bw_b_email']  = $order->billing_email;
-			$order_meta['bw_currency'] = $order->order_currency;
+			$order_meta['bw_b_email']  = $order->get_billing_email();
+			$order_meta['bw_currency'] = $order->get_currency();
 			$order_meta['bw_settings'] = $ecp_settings;
 			$order_meta['bw_store']    = plugins_url( '', __FILE__ );
 
@@ -594,22 +603,21 @@ function ECP__plugins_loaded__load_bitcoin_gateway() {
 				exit( '<h2 style="color:red;">' . $msg . '</h2>' );
 			}
 
-			$order_total_in_btc = ( $order->get_total() / $exchange_rate );
+			$order_total_in_bsv = ( $order->get_total() / $exchange_rate );
 			if ( get_woocommerce_currency() != 'BTC' ) {
 				// Apply exchange rate multiplier only for stores with non-bitcoin default currency.
-				$order_total_in_btc = $order_total_in_btc;
+				$order_total_in_bsv = $order_total_in_bsv;
 			}
 
-			$order_total_in_btc = sprintf( '%.8f', $order_total_in_btc );
+			$order_total_in_bsv = sprintf( '%.8f', $order_total_in_bsv );
 
 			$bitcoins_address = false;
-			$bch_cashaddr     = false;
 
 			$order_info =
 			array(
 				'order_meta'       => $order_meta,
 				'order_id'         => $order_id,
-				'order_total'      => $order_total_in_btc,  // Order total in BTC
+				'order_total'      => $order_total_in_bsv,  // Order total in BTC
 				'order_datetime'   => date( 'Y-m-d H:i:s T' ),
 				'requested_by_ip'  => @$_SERVER['REMOTE_ADDR'],
 				'requested_by_ua'  => @$_SERVER['HTTP_USER_AGENT'],
@@ -637,8 +645,8 @@ function ECP__plugins_loaded__load_bitcoin_gateway() {
 
 			update_post_meta(
 				$order_id,             // post id ($order_id)
-				'order_total_in_btc',  // meta key
-				$order_total_in_btc    // meta value. If array - will be auto-serialized
+				'order_total_in_bsv',  // meta key
+				$order_total_in_bsv    // meta value. If array - will be auto-serialized
 			);
 			update_post_meta(
 				$order_id,             // post id ($order_id)
@@ -707,12 +715,12 @@ function ECP__plugins_loaded__load_bitcoin_gateway() {
 			if ( version_compare( WOOCOMMERCE_VERSION, '2.1', '<' ) ) {
 				return array(
 					'result'   => 'success',
-					'redirect' => add_query_arg( 'key', $order->order_key, add_query_arg( 'order', $order_id, get_permalink( woocommerce_get_page_id( 'thanks' ) ) ) ),
+					'redirect' => add_query_arg( 'key', $order->get_order_key(), add_query_arg( 'order', $order_id, get_permalink( woocommerce_get_page_id( 'thanks' ) ) ) ),
 				);
 			} else {
 				return array(
 					'result'   => 'success',
-					'redirect' => add_query_arg( 'key', $order->order_key, add_query_arg( 'order', $order_id, $this->get_return_url( $order ) ) ),
+					'redirect' => add_query_arg( 'key', $order->get_order_key(), add_query_arg( 'order-received', $order_id, $this->get_return_url( $order ) ) ),
 				);
 			}
 		}
@@ -748,10 +756,13 @@ function ECP__plugins_loaded__load_bitcoin_gateway() {
 			if ( $sent_to_admin ) {
 				return;
 			}
-			if ( ! in_array( $order->status, array( 'pending', 'on-hold' ), true ) ) {
+
+
+			if ( ! in_array( $order->get_status(), array( 'pending', 'on-hold' ), true ) ) {
 				return;
 			}
-			if ( $order->payment_method !== 'bitcoin' ) {
+
+			if ( $order->get_payment_method() !== 'bitcoin_bsv' ) {
 				return;
 			}
 
@@ -765,7 +776,6 @@ function ECP__plugins_loaded__load_bitcoin_gateway() {
 	}
 	// END Class ECP_Bitcoin
 	// include all gateways implemented
-	require_once 'ecp-bitcoin-gateway-bch.php';
 	require_once 'ecp-bitcoin-gateway-bsv.php';
 
 	// =======================================================================
@@ -793,8 +803,6 @@ function ECP__plugins_loaded__load_bitcoin_gateway() {
 	 * @return array/
 	 */
 	function ECP__add_bitcoin_gateway( $methods ) {
-		// $methods[] = 'ECP_Bitcoin';
-		$methods[] = 'ECP_Bitcoin_Cash';
 		$methods[] = 'ECP_Bitcoin_SV';
 		return $methods;
 	}
@@ -802,7 +810,7 @@ function ECP__plugins_loaded__load_bitcoin_gateway() {
 	// =======================================================================
 	// Our hooked in function - $fields is passed via the filter!
 	function ECP__woocommerce_checkout_fields( $fields ) {
-		unset( $fields['order']['order_comments'] );
+		unset( $fields['order-pay']['order_comments'] );
 		unset( $fields['billing']['billing_first_name'] );
 		unset( $fields['billing']['billing_last_name'] );
 		unset( $fields['billing']['billing_company'] );
@@ -818,7 +826,6 @@ function ECP__plugins_loaded__load_bitcoin_gateway() {
 	// =======================================================================
 	// =======================================================================
 	function ECP__add_btc_currency( $currencies ) {
-		$currencies['BCH'] = __( 'Bitcoin Cash (฿)', 'woocommerce' );
 		$currencies['BSV'] = __( 'Bitcoin SV (฿)', 'woocommerce' );
 		return $currencies;
 	}
@@ -826,8 +833,6 @@ function ECP__plugins_loaded__load_bitcoin_gateway() {
 	// =======================================================================
 	function ECP__add_btc_currency_symbol( $currency_symbol, $currency ) {
 		switch ( $currency ) {
-			case 'BTC':
-			case 'BCH':
 			case 'BSV':
 				$currency_symbol = '฿';
 				break;
@@ -865,7 +870,7 @@ function ECP__process_payment_completed_for_order( $order_id, $bitcoins_paid = f
 		$ecp_settings = ecp__get_settings();
 		if ( $ecp_settings['autocomplete_paid_orders'] ) {
 			// Ensure order is completed.
-			$order->update_status( 'completed', __( 'Order marked as completed according to Bitcoin Cash plugin settings', 'woocommerce' ) );
+			$order->update_status( 'completed', __( 'Order marked as completed according to Bitcoin SV plugin settings', 'woocommerce' ) );
 		}
 
 		// Notify admin about payment processed
@@ -879,7 +884,7 @@ function ECP__process_payment_completed_for_order( $order_id, $bitcoins_paid = f
 				$email,
 				$email,
 				"Full payment received for order ID: '{$order_id}'",
-				"Order ID: '{$order_id}' paid in full. <br />Received BCH: '$bitcoins_paid'.<br />Please process and complete order for customer."
+				"Order ID: '{$order_id}' paid in full. <br />Received BSV: '$bitcoins_paid'.<br />Please process and complete order for customer."
 			);
 		}
 	}
