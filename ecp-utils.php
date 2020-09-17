@@ -9,7 +9,7 @@ defined( 'ABSPATH' ) or die( 'Bitcoin is for all!' );
 	  $order_info =
 		 array (
 			'order_id'        => $order_id,
-			'order_total'     => $order_total_in_btc,
+			'order_total'     => $order_total_in_bsv,
 			'order_datetime'  => date('Y-m-d H:i:s T'),
 			'requested_by_ip' => @$_SERVER['REMOTE_ADDR'],
 			);
@@ -24,106 +24,6 @@ defined( 'ABSPATH' ) or die( 'Bitcoin is for all!' );
 	   'generated_bitcoin_address'   => '18vzABPyVbbia8TDCKDtXJYXcoAFAPk2cj', // or false
 	   );
 */
-class ElectrumBCHUtil extends ElectrumUtil {
-
-	public function convert_gen_addr_to_addr_array( $gen_addr ) {
-		return array(
-			'btc_address'  => $gen_addr['generated_bitcoin_address'],
-			'bch_cashaddr' => $gen_addr['generated_bch_cashaddr'],
-		);
-	}
-
-	public function db_insert_new_address( $addresses, $status, $funds_received, $received_funds_checked_at_time, $next_key_index ) {
-		global $wpdb;
-
-		$new_btc_address  = $addresses['btc_address'];
-		$new_bch_cashaddr = $addresses['bch_cashaddr'];
-
-		$btc_addresses_table_name = $this->get_table_name();
-		$origin_id                = $this->electrum_mpk;
-
-		$query =
-			"INSERT INTO `$btc_addresses_table_name`
-            (`btc_address`, `bch_cashaddr`, `origin_id`, `index_in_wallet`, `total_received_funds`, `received_funds_checked_at`, `status`) VALUES
-            ('$new_btc_address', '$new_bch_cashaddr', '$origin_id', '$next_key_index', '$funds_received', '$received_funds_checked_at_time', '$status');";
-		$wpdb->query( $query );
-	}
-
-	public function fetch_addresses_from_row( $address_row ) {
-		return array(
-			'btc_address'  => $address_row['btc_address'],
-			'bch_cashaddr' => $address_row['bch_cashaddr'],
-		);
-	}
-
-	public function get_bitcoin_variant() {
-		return 'bch';
-	}
-
-	public function get_table_name() {
-		return TableBCH::get_table_name();
-	}
-
-	public function make_return_address( $result, $message, $host_reply_raw, $addresses = null ) {
-		$ret_info_array = array(
-			'result'         => $result,
-			'message'        => $message,
-			'host_reply_raw' => $host_reply_raw,
-		);
-		if ( $result != 'success' ) {
-			$ret_info_array['generated_bitcoin_address'] = false;
-			$ret_info_array['generated_bch_cashaddr']    = false;
-		} else {
-			$ret_info_array['generated_bitcoin_address'] = $addresses['btc_address'];
-			$ret_info_array['generated_bch_cashaddr']    = $addresses['bch_cashaddr'];
-		}
-
-		return $ret_info_array;
-	}
-
-	public function run_query_quick_address_scan( $current_time ) {
-		global $wpdb;
-
-		$assigned_address_expires_in_secs     = $this->ecp_settings['assigned_address_expires_in_mins'] * 60;
-		$funds_received_value_expires_in_secs = $this->ecp_settings['funds_received_value_expires_in_mins'] * 60;
-
-		if ( $this->ecp_settings['reuse_expired_addresses'] ) {
-			$reuse_expired_addresses_freshb_query_part =
-				"OR (`status`='assigned'
-                AND (('$current_time' - `assigned_at`) > '$assigned_address_expires_in_secs')
-                AND (('$current_time' - `received_funds_checked_at`) < '$funds_received_value_expires_in_secs')
-                )";
-		} else {
-			$reuse_expired_addresses_freshb_query_part = '';
-		}
-
-		// -------------------------------------------------------
-		// Quick scan for ready-to-use address
-		// NULL == not found
-		// Retrieve:
-		// 'unused'   - with fresh zero balances
-		// 'assigned' - expired, with fresh zero balances (if 'reuse_expired_addresses' is true)
-		//
-		// Hence - any returned address will be clean to use.
-		$origin_id                = $this->electrum_mpk;
-		$btc_addresses_table_name = $this->get_table_name();
-		$query                    =
-			"SELECT `btc_address`, `bch_cashaddr` FROM `$btc_addresses_table_name`
-             WHERE `origin_id`='$origin_id'
-             AND `total_received_funds`='0'
-             AND (`status`='unused' $reuse_expired_addresses_freshb_query_part)
-             ORDER BY `index_in_wallet` ASC
-             LIMIT 1;"; // Try to use lower indexes first
-		$clean_address            = $wpdb->get_var( $query, 0, 0 );
-		$bch_cashaddr             = $wpdb->get_var( null, 1, 0 );
-
-		return array(
-			'btc_address'  => $clean_address,
-			'bch_cashaddr' => $bch_cashaddr,
-		);
-	}
-}
-
 class ElectrumBSVUtil extends ElectrumUtil {
 
 
@@ -280,7 +180,7 @@ abstract class ElectrumUtil {
 
 	public function make_address_request_array( $addresses ) {
 		$address_request_array                = array();
-		$address_request_array['btc_address'] = $addresses['btc_address']; // $addresses["bch_cashaddr"];
+		$address_request_array['btc_address'] = $addresses['btc_address'];
 
 		return $address_request_array;
 	}
@@ -376,7 +276,7 @@ abstract class ElectrumUtil {
 
 				// $address_request_array = array();
 				// $address_request_array['btc_address'] = $address_to_verify_for_zero_balance;
-				// $address_request_array['required_confirmations'] = 6;
+				// $address_request_array['required_confirmations'] = 0;
 				// $address_request_array['api_timeout'] = $this->ecp_settings['blockchain_api_timeout_secs'];
 				// possible clean address
 				$maybe_clean_address = $this->fetch_addresses_from_row( $address_to_verify_for_zero_balance_row );
@@ -436,7 +336,7 @@ abstract class ElectrumUtil {
 				  $order_info =
 				  array (
 					 'order_id'     => $order_id,
-					 'order_total'  => $order_total_in_btc,
+					 'order_total'  => $order_total_in_bsv,
 					 'order_datetime'  => date('Y-m-d H:i:s T'),
 					 'requested_by_ip' => @$_SERVER['REMOTE_ADDR'],
 					 );
@@ -449,7 +349,7 @@ abstract class ElectrumUtil {
 						// All orders placed on this address in reverse chronological order
 						array (
 						   'order_id'     => $order_id,
-						   'order_total'  => $order_total_in_btc,
+						   'order_total'  => $order_total_in_bsv,
 						   'order_datetime'  => date('Y-m-d H:i:s T'),
 						   'requested_by_ip' => @$_SERVER['REMOTE_ADDR'],
 						),
@@ -558,7 +458,7 @@ abstract class ElectrumUtil {
 		// this defines the providers priorities
 		// first provider in the array is checked first
 		// if it fails, we move on to the next one
-		$providers_class = array( 'BTCComAPI', 'BCHSVExplorer', 'BlockdozerAPI', 'BlockExplorerAPI', 'TokenViewAPI' );
+		$providers_class = array( 'BTCComAPI', 'BCHSVExplorer', 'TokenViewAPI' );
 
 		$providers = array();
 		foreach ( $providers_class as $provider ) {
@@ -657,7 +557,7 @@ $ret_info_array = array (
   Get web page contents
 */
 function ECP__file_get_contents( $url, $timeout = 60 ) {
-	
+
 	$response = wp_remote_get( $url, $timeout );
 	$resp_code = wp_remote_retrieve_response_code( $response );
 	$content = wp_remote_retrieve_body( $response );
