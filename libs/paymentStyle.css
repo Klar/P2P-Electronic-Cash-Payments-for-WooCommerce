@@ -1,0 +1,10 @@
+.row {
+  display: flex;  /* aligns all child elements (flex items) in a row */
+  background-color: rgba(0, 0, 0, 0.05);
+  margin: 2px;
+  padding: 1.5rem;
+}
+
+.col {
+  flex: 1;        /* distributes space on the line equally among items */
+}

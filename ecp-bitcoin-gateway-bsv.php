@@ -13,6 +13,11 @@ function moneybutton_init() {
 }
 add_action('wp_enqueue_scripts','moneybutton_init');
 
+// init css style
+function payment_css() {
+  wp_enqueue_style( 'payment-css', plugins_url( '/libs/paymentStyle.css', __FILE__ ) );
+}
+add_action( 'wp_enqueue_scripts', 'payment_css' );
 
 /*
  * Bitcoin SV payment gateway
@@ -73,56 +78,37 @@ class ECP_Bitcoin_SV extends ECP_Bitcoin {
 
 	public function default_payment_instructions() {
 		$payment_instructions = '
-					<table class="ecp-payment-instructions-table" id="ecp-payment-instructions-table">
-              <tr class="bpit-table-row">
-                <td colspan="2">' . __( 'Please send your Bitcoin SV payment as follows:', 'woocommerce' ) . '</td>
-              </tr>
-              <tr class="bpit-table-row">
-                <td style="vertical-align:middle;" class="bpit-td-name bpit-td-name-amount">
-                  ' . __( 'Amount', 'woocommerce' ) . ':
-                </td>
-                <td class="bpit-td-value bpit-td-value-amount">
-                  <div style="padding:2px 6px;margin:2px;font-weight: bold;font-size: 120%;">
-                    {{{BITCOINS_AMOUNT}}} BSV
-                  </div>
-                </td>
-              </tr>
-              <tr class="bpit-table-row">
-                <td style="vertical-align:middle;" class="bpit-td-name bpit-td-name-btcaddr">
-                  Legacy Address:
-                </td>
-                <td class="bpit-td-value bpit-td-value-btcaddr">
-                  <div style="padding:2px 6px;font-weight: bold;font-size: 120%;">
-										<a href="{{{BIP_URL}}}{{{BITCOINS_ADDRESS}}}?sv&amount={{{BITCOINS_AMOUNT}}}&message={{{PAYMENT_MESSAGE}}}">{{{BITCOINS_ADDRESS}}}</a>
-                  </div>
-                </td>
-              </tr>
-              <tr class="bpit-table-row">
-                <td style="vertical-align:middle;" class="bpit-td-name bpit-td-name-qr">
-                    QR Code:
-                </td>
-                <td class="bpit-td-value bpit-td-value-qr">
-                  <div style="padding:2px 0px;">
+          <section>
+            <div class="row">
+              <div class="col"> ' . __( 'Please send your Bitcoin SV payment as follows:', 'woocommerce' ) . '</div>
+            </div>
+            <div class="row">
+              <div class="col"> ' . __( 'Amount', 'woocommerce' ) . ':  <p class="col" style="font-weight: bold;font-size: 120%;"> {{{BITCOINS_AMOUNT}}} BSV </p> </div>
+            </div>
+            <div class="row">
+              <div class="col">   Legacy Address: <p style="overflow-wrap: anywhere; font-weight: bold;font-size: 120%;"> {{{BITCOINS_ADDRESS}}} </p> </div>
+            </div>
+            <div class="row">
+              <div class="col"> QR Code:
+                  <p>
                     <a href="{{{BIP_URL}}}{{{BITCOINS_ADDRESS}}}?sv&amount={{{BITCOINS_AMOUNT}}}&message={{{PAYMENT_MESSAGE}}}"> <img src="https://api.qrserver.com/v1/create-qr-code/?color=000000&amp;bgcolor=FFFFFF&amp;data={{{BIP_URL}}}{{{BITCOINS_ADDRESS}}}%3Fsv%26amount%3D{{{BITCOINS_AMOUNT}}}%26message%3D{{{PAYMENT_MESSAGE_URL_SAFE}}}&amp;qzone=1&amp;margin=0&amp;size=180x180&amp;ecc=L" style="vertical-align:middle;border:1px solid #888;" /> </a>
+                  </p>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col">   Bezahlen mit Moneybutton:
+                 <div class="money-button"
+                    data-to="{{{BITCOINS_ADDRESS}}}"
+                    data-amount="{{{BITCOINS_AMOUNT}}}"
+                    data-currency="BSV"
+                    data-on-payment="displayHiddenContent"
+                    >
                   </div>
-                </td>
-							</tr>
-							<tr class="bpit-table-row">
-							  <td style="vertical-align:middle;" class="bpit-td-name bpit-td-name-qr">
-									Bezahlen mit Moneybutton:
-							  </td>
-								<td class="bpit-td-value bpit-td-value-qr">
-									<div style="padding:2px 0px;" id="my-hidden-content"></div>
-									<div style="padding:2px 0px;" class="money-button"
-										data-to="{{{BITCOINS_ADDRESS}}}"
-										data-amount="{{{BITCOINS_AMOUNT}}}"
-										data-currency="BSV"
-										data-on-payment="displayHiddenContent"
-									 >
-									</div>
-								</td>
-              </tr>
-            </table>
+              </div>
+              <div class="col" id="my-hidden-content"></div>
+            </div>
+          </section>
 
             ' . __( 'Please note:', 'woocommerce' ) . '
             <ol class="bpit-instructions">
